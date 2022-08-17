@@ -1,0 +1,51 @@
+#!/usr/bin/php
+<?php
+
+require_once 'conf.d/base.conf';
+require_once( ROOT_DIR . '/lib/class/x2Deamon.class.php' );
+
+// prüfen ob ich aus der Konsole aufgerufen wurde
+if( PHP_SAPI != 'cli' )
+{
+    print "Der x2Deamon ist nur in der Konsole lauffähig!";
+    exit(1);
+}
+
+/* den Deamon forken um sich von der Konsole zu trennen
+ * ab hier sind dann 2 Prozesse am Werk die den Code beackern
+ * pcntl_fork gibt dabei in jedem Thread eine Antwort
+ * -1  = fork ist fehlgeschlagen
+ * 0   = im Kind-Thread
+ * PID = im Eltern-Prozess
+ *
+ * der Elternprozess wird mit exit Beendet um die Konsole frei zu geben
+ */
+switch( pcntl_fork( ))
+{
+    case -1: print "Es konnte kein x2Deamon-Prozess erstellt werden!";
+             exit(2);
+             break;
+
+    case 0: // im Kind-Thread
+            break;
+
+    default: exit(0);
+             break;
+}
+
+// meine Instanz erstellen
+$deamon = new x2Deamon( );
+
+// den Signalhandler erstellen
+$deamon->registerSignal( );
+
+// prüfen, ob bereits andere Deamons laufen
+$deamon->checkOtherDeamons( );
+
+// den Loop starten
+$deamon->loop( );
+
+// aufräumen
+unset( $deamon );
+
+?>

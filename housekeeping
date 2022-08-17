@@ -1,0 +1,39 @@
+#!/usr/bin/php
+<?php
+
+require_once 'conf.d/base.conf';
+require_once( ROOT_DIR . '/conf.d/x2_host.conf' );
+require_once( ROOT_DIR . '/lib/class/dbLink.class.php' );
+
+$db = new dbMysql( 'X2', true );
+
+// pageIDs aufräumen
+print date( 'Y-m-d H:i:s' ) . ": PAGE_ID\n";
+
+$db->dbRequest( "delete
+                   from PAGE_ID
+                  where CTS < date_add( now( ), interval -12 hour )" );
+
+print date( 'Y-m-d H:i:s' ) . ": OK\n";
+
+// X2_Actionlog
+print date( 'Y-m-d H:i:s' ) . ": X2_ACTIONLOG\n";
+
+$db->dbRequest( "delete
+                   from X2_ACTIONLOG
+                  where CTS < date_add( now( ), interval ? month )",
+                array( array( 'i', HOUSEKEEPING_KEEP_ACTIONLOG_MONTH )));
+
+print date( 'Y-m-d H:i:s' ) . ": OK\n";
+
+// X2_ARCHIV
+print date( 'Y-m-d H:i:s' ) . ": X2_ARCHIV\n";
+
+$db->dbRequest( "delete
+                   from X2_ARCHIV
+                  where PROCESS_STOP < date_add( now( ), interval ? month )",
+                array( array( 'i', HOUSEKEEPING_KEEP_ARCHIV_MONTH )));
+
+print date( 'Y-m-d H:i:s' ) . ": OK\n";
+
+?>

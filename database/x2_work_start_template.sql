@@ -1,0 +1,11 @@
+CREATE TABLE X2_WORK_START_TEMPLATE
+(
+    OID         INT                                    NOT NULL,
+    TEMPLATE_ID INT                                    NOT NULL,
+    START_MODE  ENUM( 'OK', 'ERROR', 'WAIT', 'RETRY' ) NOT NULL,
+    VAR_MODE    ENUM( 'NONE', 'PRIORITY' )             NOT NULL,
+    RUN_MODE    ENUM( 'FOREGROUND', 'BACKGROUND' )     NOT NULL,
+    REF_EXE     INT                                        NULL,
+    CONSTRAINT PK_X2_WORK_START_TEMPLATE PRIMARY KEY (OID),
+    CONSTRAINT FK_X2_WORK_START_TEMPLATE_JID FOREIGN KEY (OID) REFERENCES X2_WORKLIST (OID)
+);

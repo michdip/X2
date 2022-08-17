@@ -1,0 +1,42 @@
+body
+{
+    height: 100%;
+    background-color: #009FE3;
+}
+
+h2 {
+    font-size: 30px;
+    font-family: inherit;
+    font-weight: 500;
+    line-height: 1.1;
+    color: inherit;
+}
+
+table {
+    border: 1px solid #ddd;
+    max-width: 100%;
+    margin-bottom: 20px;
+    border-spacing: 0;
+    border-collapse: collapse;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size: 14px;
+    line-height: 1.42857143;
+    background-color: #ffffff;
+}
+
+thead tr th {
+    border: 1px solid #ddd;
+    border-bottom-width: 2px;
+}
+
+tbody tr td {
+    border: 1px solid #ddd;
+}
+
+tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+tr:hover {
+    background-color: #66d1ff !important;
+}

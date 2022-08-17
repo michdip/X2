@@ -1,0 +1,237 @@
+@font-face {
+    font-family: 'Glyphicons Halflings';
+
+    src: url('../font/glyphicons-halflings-regular.eot');
+    src: url('../font/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'),
+         url('../font/glyphicons-halflings-regular.woff2') format('woff2'),
+         url('../font/glyphicons-halflings-regular.woff') format('woff'),
+         url('../font/glyphicons-halflings-regular.ttf') format('truetype'),
+         url('../font/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
+}
+
+.redButton {
+    color: #fff;
+    background-color: #ff0000;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+.blueButton {
+    color: #fff;
+    background-color: #337ab7;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+.greenButton {
+    color: #fff;
+    background-color: #33cc33;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+.grayButton {
+    color: #fff;
+    background-color: #808080;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+.whiteButton {
+    color: #000;
+    background-color: #fff;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+.purpleButton {
+    color: #fff;
+    background-color: #800080;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+.orangeButton {
+    color: #FFF;
+    background-color: #FFA000;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+
+.smalButton {
+    font-size: 10px;
+    padding: 3px 6px;
+    border-radius: 3px;
+}
+
+.rotated {
+    transform: rotate(90deg);
+    text-align: center;
+}
+
+.rotatedButton {
+    padding: 12px 6px;
+}
+
+.glRad::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e019";
+}
+
+.glPferd::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e215";
+}
+
+.glOk::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e013";
+}
+
+.glEye::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e105";
+}
+
+.glRem::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e020";
+}
+
+.glEdit::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\270f";
+}
+
+.glMove::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e068";
+}
+
+.glPower::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e017";
+}
+
+.glPlay::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e072";
+}
+
+.glSchedule::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e109";
+}
+
+.glEject::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e078";
+}
+
+.glOkState::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e125";
+}
+
+.glFire::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e104";
+}
+
+.glPause::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e073";
+}
+
+.glLupe::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e003";
+}
+
+.glMail::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\2709";
+}
+
+.glDup::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e224";
+}
+
+.glVar::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e163";
+}
+
+.glFilter::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e138";
+}
+
+.glRecht::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e233";
+}
+
+.glRunner::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e031";
+}
+
+.glExport::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e175";
+}
+
+.glImport::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e176";
+}
+
+.glNOkState::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e126";
+}
+
+.glFKreuz::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e087";
+}
+
+.glFilm::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e009";
+}
+
+.glWarning::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e107";
+}
+
+.glTag::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e041";
+}
+
+.glLink::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e144";
+}
+
+.glGPS::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e062";
+}
+
+.glRoad::before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e024";
+}

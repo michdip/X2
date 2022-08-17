@@ -1,0 +1,72 @@
+#!/usr/bin/php
+<?php
+
+require_once 'conf.d/base.conf';
+require_once( ROOT_DIR . '/lib/class/dbLink.class.php' );
+require_once( ROOT_DIR . '/lib/class/ssh.class.php' );
+require_once( ROOT_DIR . '/lib/class/logRotation.class.php' );
+
+$db = new dbMysql( 'X2', true );
+
+$exitCode = 0;
+
+// Dateien komprimieren
+foreach( logRotation::getFilesToCompress( $db ) as $host )
+{
+    print date( 'Y-m-d H:i:s' ) . ': Auf ' . $host['name'] . ' sollen ' . count( $host['files'] ) . " Dateien komprimiert werden\n";
+
+    $ssh = sshFactory( $host['name'] );
+
+    if( $ssh->activ )
+        foreach( $host['files'] as $file )
+        {
+            $stdout = $ssh->execute( 'bzip2 ' . $file . ' 2>&1' );
+
+            if( $stdout == '' )
+            {
+                print date( 'Y-m-d H:i:s' ) . ': File: ' . $file . " komprimiert\n";
+                logRotation::compressFile( $db, $host['name'], $file );
+            }
+            else
+            {
+                print $stdout;
+                $exitCode = 1;
+            }
+        }
+
+    unset( $ssh );
+}
+
+// Dateien löschen
+foreach( logRotation::getFilesToDelete( $db ) as $host )
+{
+    print date( 'Y-m-d H:i:s' ) . ': Auf ' . $host['name'] . ' sollen ' . count( $host['files'] ) . " Dateien gelöscht werden\n";
+
+    $ssh = sshFactory( $host['name'] );
+
+    if( $ssh->activ )
+        foreach( $host['files'] as $file )
+        {
+            $stdout = $ssh->execute( 'rm -f ' . $file . '* 2>&1' );
+
+            if( $stdout == '' )
+            {
+                print print date( 'Y-m-d H:i:s' ) . ': File: ' . $file . "* gelöscht\n";
+                logRotation::deleteFile( $db, $host['name'], $file );
+            }
+            else
+            {
+                print $stdout;
+                $exitCode = 1;
+            }
+        }
+
+    unset( $ssh );
+}
+
+
+unset( $db );
+
+exit( $exitCode );
+
+?>

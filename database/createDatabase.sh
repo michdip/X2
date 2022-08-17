@@ -1,0 +1,34 @@
+#!/bin/bash
+
+./execute.sh sequence.sql
+./execute.sh mutex.sql
+./execute.sh page_id.sql
+./execute.sh permission.sql
+./execute.sh x2_native_log.sql
+./execute.sh x2_view_option.sql
+./execute.sh x2_maintenance_time.sql
+./execute.sh x2_deamon.sql
+./execute.sh x2_job_reference.sql
+./execute.sh x2_job_state.sql
+./execute.sh x2_template.sql
+./execute.sh x2_template_tree.sql
+./execute.sh x2_template_notifier.sql
+./execute.sh x2_joblist.sql
+./execute.sh x2_job_tree.sql
+./execute.sh x2_job_variable.sql
+./execute.sh x2_job_start.sql
+./execute.sh x2_job_command.sql
+./execute.sh x2_job_start_template.sql
+./execute.sh x2_worklist.sql
+./execute.sh x2_work_tree.sql
+./execute.sh x2_work_variable.sql
+./execute.sh x2_work_command.sql
+./execute.sh x2_work_start_template.sql
+./execute.sh x2_work_group.sql
+./execute.sh x2_work_reference.sql
+./execute.sh x2_logfile.sql
+./execute.sh x2_archiv.sql
+./execute.sh x2_action.sql
+./execute.sh x2_actionlog.sql
+./execute.sh x2_description.sql
+./execute.sh x2_calculate_start_tmp.sql

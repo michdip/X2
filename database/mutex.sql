@@ -1,0 +1,18 @@
+CREATE TABLE MUTEX
+(
+    OID       INT                                      NOT NULL AUTO_INCREMENT,
+    OBJECT    ENUM( 'SEQ', 'TEMPLATE' )                NOT NULL,
+    OBJECT_ID INT                                      NOT NULL,
+    STATE     ENUM( 'FREE', 'TAKEN' )   DEFAULT 'FREE' NOT NULL,
+    OWNER     VARCHAR(255),
+    DTS       DATETIME                  DEFAULT NOW()  NOT NULL,
+    CONSTRAINT PK_MUTEX PRIMARY KEY (OID)
+);
+
+CREATE INDEX IND_MUTEX_MID ON MUTEX(OBJECT, OBJECT_ID);
+
+INSERT INTO MUTEX (OBJECT, OBJECT_ID)
+SELECT 'SEQ', OID
+  FROM SEQUENCE;
+
+COMMIT;

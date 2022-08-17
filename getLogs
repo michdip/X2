@@ -1,0 +1,87 @@
+#!/usr/bin/php
+<?php
+
+require_once( 'conf.d/base.conf' );
+require_once( ROOT_DIR . '/lib/class/dbLink.class.php' );
+require_once( ROOT_DIR . '/lib/class/ssh.class.php' );
+
+$db = new dbMysql( 'X2', false );
+
+// alle offenen Logfiles laden
+$files = $db->dbRequest( "select l.OID, l.FILENAME, w.HOST
+                            from X2_LOGFILE l
+                                 inner join X2_WORK_COMMAND w
+                                    on w.OID = l.OID
+                           where l.FILENAME is not null
+                           order by w.HOST" );
+
+$host = '';
+$scpConn = null;
+
+foreach( $files->resultset as $file )
+{
+    // die Verbindung zum Host aufbauen, wenn sich der Host ändert
+    if( $host != $file['HOST'] )
+    {
+        if( $scpConn != null )
+        {
+            print 'Trenne Verbindung zu ' . REMOTE_HOSTS[ $host ]['host'] . "\n";
+            unset( $scpConn );
+        }
+
+        $scpConn = sshFactory( $file['HOST'] );
+        $host = $file['HOST'];
+    }
+
+    // wenn die Verbindung aufgebaut ist
+    if( $scpConn->activ )
+    {
+        // der Zielname auf meiner Maschine
+        $ziel = ROOT_DIR . "/tmp/getLogs_" . $file['OID'] . "_" . basename( $file['FILENAME'] );
+
+        print 'Lade File ' . $file['FILENAME'] . "\n"
+            . '     nach ' . $ziel . "\n";
+
+        // SCP der Datei
+        $cp = $scpConn->copyFrom( $file['FILENAME'], $ziel );
+
+        if( $cp )
+        {
+            print "OK\n";
+
+            // die Datei öffnen
+            $handle = fopen( $ziel, 'r' );
+
+            if( $handle )
+            {
+                // Maximal 1MB = 1024 kB = 1.048.576 Bytes aus der Datei lesen
+                $content = fread( $handle, 1048576 );
+
+                // die Inhalt in die DB schreiben
+                $db->dbRequest( "update X2_LOGFILE
+                                    set FILENAME = null,
+                                        DATA = ?
+                                  where OID = ?",
+                                array( array( 's', $content ),
+                                       array( 'i', $file['OID'] )));
+
+                $db->commit( );
+
+                unset( $content );
+                fclose( $handle );
+
+                // Datei remote löschen
+                $scpConn->execute( "rm " . $file['FILENAME'] . " 2>&1" );
+
+                // lokale Datei löschen
+                unlink( $ziel );
+            }
+            else
+                print "FEHLER: die lokale datei konnte nicht geöffnet werden\n";
+        }
+        else
+            print "FEHLER\n";
+    }
+}
+
+?>
