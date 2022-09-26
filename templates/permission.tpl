@@ -46,7 +46,6 @@
                         <th>Lesen</th>
                         <th>Ausführen</th>
                         <th>Editieren</th>
-                        <th>Administrator</th>
                     </tr>
 
                     {foreach from=$allGroups key=groupname item=props}
@@ -75,14 +74,6 @@
                                                  groupname=$groupname
                                                  permission=$PERM_WRITE
                                                  pValue=$props[ $PERM_WRITE ]}
-
-                            {printEditPermission parentID=$parentID
-                                                 pageID=$pageID
-                                                 templateID=$setRights
-                                                 editable=$editable
-                                                 groupname=$groupname
-                                                 permission=$PERM_ADMIN
-                                                 pValue=$props[ $PERM_ADMIN ]}
                         </tr>
                     {/foreach}
                 </table>

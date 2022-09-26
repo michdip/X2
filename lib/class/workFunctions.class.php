@@ -84,7 +84,8 @@ class workFunctions
 
         $refJobs = $db->dbRequest( "select 1
                                       from X2_WORK_REFERENCE
-                                     where OBJECT_ID = ?",
+                                     where OBJECT_TYPE = 'JOB'
+                                       and OBJECT_ID = ?",
                                    array( array( 'i', $oid )));
 
         if( $folgeJobs->numRows == 0 && $refJobs->numRows == 0 )
@@ -138,13 +139,8 @@ class workFunctions
                                           $position,
                                           $user = '',
                                           $withLog = false,
-                                          $reuseJobId = true )
+                                          $jobId = null )
     {
-        $jobId = null;
-
-        if( !$reuseJobId )
-            $jobId = -1;
-
         // den job erstellen
         $newIDs = $db->dbRequest( "insert into X2_WORKLIST (JOB_OID, TEMPLATE_ID, TEMPLATE_EXE_ID, JOB_NAME, JOB_TYPE)
                                    select coalesce( ?, JOB_OID), TEMPLATE_ID, TEMPLATE_EXE_ID, ?, ?
@@ -274,7 +270,7 @@ class workFunctions
                                                    WORK_JOB_POSITION_FOLLOW,
                                                    $user,
                                                    true,
-                                                   false );
+                                                   -1 );
 
             // Kommando setzen
             require_once( MODULES['COMMAND']['classFile'] );
@@ -1339,7 +1335,8 @@ class workFunctions
                                         JOB_TYPE,
                                         JOB_NAME,
                                         TEMPLATE_ID,
-                                        TEMPLATE_EXE_ID
+                                        TEMPLATE_EXE_ID,
+                                        STATE
                                    from X2_WORKLIST
                                   where OID = ?",
                                 array( array( 'i', $wid )));

@@ -205,6 +205,8 @@ $this->runDeamon = false;
                                                 break;
             }
 
+            $this->logger->writeLog( "Message " . $msg['OID'] . " Mode: " . $msg['DEAMON_MODE'] . " WID: " . $msg['WORKLIST_OID'] . " retCode " . $retCode );
+
             if( $retCode ) 
             {
                 $this->db->dbRequest( "delete

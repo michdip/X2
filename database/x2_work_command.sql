@@ -5,6 +5,7 @@ CREATE TABLE X2_WORK_COMMAND
     SOURCE     VARCHAR(255),
     EXEC_PATH  VARCHAR(100)  DEFAULT '/'   NOT NULL,
     COMMAND    VARCHAR(500)                NOT NULL,
+    INSTANCES  INT                             NULL,
     RETRIES    INT           DEFAULT 0     NOT NULL,
     RETRY_TIME INT           DEFAULT 0     NOT NULL,
     HOST_PID   int           DEFAULT NULL,

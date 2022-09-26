@@ -18,6 +18,7 @@ class jobFunctions
         $refJobs = $db->dbRequest( "select 1
                                       from X2_JOB_REFERENCE
                                      where OBJECT_TYPE = 'JOB'
+                                       and OBJECT_ID != REF_JOB
                                        and OBJECT_ID = ?",
                                    array( array( 'i', $oid )));
 

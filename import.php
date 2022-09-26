@@ -1,7 +1,6 @@
 <?php
 
 require_once 'conf.d/base.conf';
-require_once 'conf.d/x2_host.conf';
 require_once( ROOT_DIR . '/lib/class/mySmarty.class.php' );
 require_once( ROOT_DIR . '/lib/class/permission.class.php' );
 require_once( ROOT_DIR . '/lib/class/dbLink.class.php' );
@@ -9,6 +8,8 @@ require_once( ROOT_DIR . '/lib/class/pageID.class.php' );
 require_once( ROOT_DIR . '/lib/class/templateFunctions.class.php' );
 require_once( ROOT_DIR . '/lib/class/jobFunctions.class.php' );
 require_once( ROOT_DIR . '/lib/class/description.class.php' );
+require_once( ROOT_DIR . '/lib/class/modulFunctions.class.php' );
+require_once( ROOT_DIR . '/lib/class/ssh.class.php' );
 
 function checkRefHosts( &$import, $post )
 {
@@ -123,6 +124,11 @@ function importTemplate( $db, $template, &$refMap, $parent, $permission, $module
                       foreach( $template['jobTree'] as $link )
                           jobFunctions::linkJob( $db, $jobMap[ $link['jid']], $jobMap[ $link['pid']], $user, true );
 
+                  // Job-Referenzen erstellen
+                  foreach( $template['jobs'] as $job )
+                      if( $job['type'] == 'BILLIT_ADAPTER' )
+                          $modules[ $job['type']]->updateRef( $db, $jobMap[ $job['jid']], $jobMap[ $job['bmqProducer']], $user );
+
                   break;
     }
 }
@@ -138,16 +144,7 @@ function import( $db, &$import, $post, $parent, $perm )
         checkRefTemplate( $import, $post );
 
         // alle Module instanziieren
-        $modules = array( );
-
-        foreach( MODULES as $moduleName => $moduleDef )
-            if( $moduleDef['active'] )
-            {
-                require_once( $moduleDef['classFile'] );
-
-                $className = $moduleDef['className'];
-                $modules[ $moduleName ] = new $className( );
-            }
+        $modules = modulFunctions::getAllModulInstances( );
 
         // das Mapping der alten auf die neuen tids
         $import['tRefMap'] = array( );
@@ -159,9 +156,9 @@ function import( $db, &$import, $post, $parent, $perm )
         foreach( $import['refTid'] as $oTId => $refT )
             foreach( $refT['refJobs'] as $job )
                 if( $refT['refTaget'] != '' )
-                    $modules['START_TEMPLATE']->postImport( $db, $job, $refT['refTaget'], $perm->getMyUserName( ));
+                    $modules['START_TEMPLATE']->updateRef( $db, $job, $refT['refTaget'], $perm->getMyUserName( ));
                 else
-                    $modules['START_TEMPLATE']->postImport( $db, $job, $import['tRefMap'][ $oTId ], $perm->getMyUserName( ));
+                    $modules['START_TEMPLATE']->updateRef( $db, $job, $import['tRefMap'][ $oTId ], $perm->getMyUserName( ));
 
         $db->commit( );
 

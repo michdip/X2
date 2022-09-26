@@ -556,7 +556,7 @@ function getGroupLabel( $db, $job, $get, $modules, $tState, $ungrouped = false )
 {
     $label = '<TABLE>'
            . '<TR>'
-           . '<TD COLSPAN="7">Gruppe ' . $job['JOB_OID'] . '</TD>'
+           . '<TD COLSPAN="7">Gruppe ' . $job['JOB_NAME'] . ' / ' . $job['JOB_OID'] . '</TD>'
            . '</TR>';
 
     // das Fleisch vom Modul holen

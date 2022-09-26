@@ -1,6 +1,6 @@
 CREATE TABLE X2_ACTIONLOG
 (
-    OID              INT                         NOT NULL AUTO_INCREMENT,
+    OID              INT UNSIGNED                NOT NULL AUTO_INCREMENT,
     TEMPLATE_ID      INT                         NOT NULL,
     TEMPLATE_EXE_ID  INT,
     ACTION_ID        INT                         NOT NULL,

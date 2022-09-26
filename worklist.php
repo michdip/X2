@@ -10,6 +10,7 @@ require_once( ROOT_DIR . '/lib/class/jobFunctions.class.php' );
 require_once( ROOT_DIR . '/lib/class/description.class.php' );
 require_once( ROOT_DIR . '/lib/class/modulFunctions.class.php' );
 require_once( ROOT_DIR . '/lib/class/jobState.class.php' );
+require_once( ROOT_DIR . '/lib/class/workFunctions.class.php' );
 
 function prepareEdit( $db, $get, &$smarty, &$css )
 {
@@ -130,7 +131,11 @@ if( $perm->isValidSession( ))
                  $perm->canIDo( $db, PERM_OBJECT_TEMPLATE, $template['OID'], PERM_WRITE ))
         {
             workFunctions::changeWorkJobType( $db, $exeID, $_POST['jobID'], $_POST['changeJobType'], $perm->getMyUserName( ));
-            prepareEdit( $db, array( 'edit' => $_POST['jobID'] ), $smarty, $css );
+            prepareEdit( $db,
+                         array( 'edit' => $_POST['jobID'],
+                                'wid'  => $_POST['exeID'] ),
+                         $smarty,
+                         $css );
         }
 
         // Antwort dem Modul zur Verfügung stellen

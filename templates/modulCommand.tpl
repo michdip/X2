@@ -6,10 +6,14 @@
     <input type="hidden" name="host" value="{$eJob.HOST}" />
     <input type="hidden" name="source" value="{$eJob.SOURCE}" />
     <input type="hidden" name="execpath" value="{$eJob.EXEC_PATH}" />
-    <input type="hidden" name="retries" value="{$eJob.RETRIES}" />
-    <input type="hidden" name="retryTime" value="{$eJob.RETRY_TIME}" />
-    {if !$workMode}
+
+    {if isset( $cmdOpts.instances ) && $cmdOpts.instances}
         <input type="hidden" name="instances" value="{$eJob.INSTANCES}" />
+    {/if}
+
+    {if isset( $cmdOpts.retries ) && $cmdOpts.retries}
+        <input type="hidden" name="retries" value="{$eJob.RETRIES}" />
+        <input type="hidden" name="retryTime" value="{$eJob.RETRY_TIME}" />
     {/if}
 
     <tr>
@@ -24,20 +28,22 @@
         <td>EXE-Pfad</td>
         <td>{$eJob.EXEC_PATH}</td>
     </tr>
-    {if !$workMode}
+    {if isset( $cmdOpts.instances ) && $cmdOpts.instances}
         <tr>
             <td>Instanzen</td>
             <td>{$eJob.INSTANCES}</td>
         </tr>
     {/if}
-    <tr>
-        <td>Retries</td>
-        <td>{$eJob.RETRIES}</td>
-    </tr>
-    <tr>
-        <td>Retry-Verz&ouml;gerung</td>
-        <td>{$eJob.RETRY_TIME}</td>
-    </tr>
+    {if isset( $cmdOpts.retries ) && $cmdOpts.retries}
+        <tr>
+            <td>Retries</td>
+            <td>{$eJob.RETRIES}</td>
+        </tr>
+        <tr>
+            <td>Retry-Verz&ouml;gerung</td>
+            <td>{$eJob.RETRY_TIME}</td>
+        </tr>
+    {/if}
     <tr>
         <td>Befehl</td>
         <td>
@@ -75,7 +81,7 @@
             <input type="text" name="execpath" size="85" value="{$eJob.EXEC_PATH}" />
         </td>
     </tr>
-    {if !$workMode}
+    {if isset( $cmdOpts.instances ) && $cmdOpts.instances}
         <tr>
             <td>Instanzen</td>
             <td>
@@ -91,25 +97,32 @@
             </td>
         </tr>
     {/if}
-    <tr>
-        <td>Retries</td>
-        <td>
-            <input type="text" name="retries" size="10" value="{$eJob.RETRIES}" />
-        </td>
-    </tr>
-    <tr>
-        <td>Retry-Verz&ouml;gerung</td>
-        <td>
-            <input type="text" name="retryTime" size="10" value="{$eJob.RETRY_TIME}" />
-        </td>
-    </tr>
+    {if isset( $cmdOpts.retries ) && $cmdOpts.retries}
+        <tr>
+            <td>Retries</td>
+            <td>
+                <input type="text" name="retries" size="10" value="{$eJob.RETRIES}" />
+            </td>
+        </tr>
+        <tr>
+            <td>Retry-Verz&ouml;gerung</td>
+            <td>
+                <input type="text" name="retryTime" size="10" value="{$eJob.RETRY_TIME}" />
+            </td>
+        </tr>
+    {/if}
     <tr>
         <td>Befehl</td>
         <td>
-            <input type="text" name="command" size="80" {getInputValue inputValue=$eJob.COMMAND} />
-            <button type="submit" name="findPattern" value="1">
-                <span class="glLupe" />
-            </button>
+            {if isset( $cmdOpts.findPattern ) && $cmdOpts.findPattern}
+                <input type="text" name="command" size="80" {getInputValue inputValue=$eJob.COMMAND} />
+
+                <button type="submit" name="findPattern" value="1">
+                    <span class="glLupe" />
+                </button>
+            {else}
+                <input type="text" name="command" size="85" {getInputValue inputValue=$eJob.COMMAND} />
+            {/if}
         </td>
     </tr>
 {/if}

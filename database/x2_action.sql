@@ -35,3 +35,4 @@ INSERT INTO X2_ACTION (OID, DESCRIPTION) VALUES (27, 'Änderung des Status (Name
 INSERT INTO X2_ACTION (OID, DESCRIPTION) VALUES (28, 'Die Ausführung des Templates wurde abgebrochen' );
 INSERT INTO X2_ACTION (OID, DESCRIPTION) VALUES (29, 'Das Template wurde zur Ausführung gebracht' );
 INSERT INTO X2_ACTION (OID, DESCRIPTION) VALUES (30, 'Die PID des Jobs wurde gesetzt (ID / PID)' );
+INSERT INTO X2_ACTION (OID, DESCRIPTION) VALUES (31, 'Der Billit-Adapter wurde geändert (ID / Modul / Instanz / min Messages / Erzeuger )' );

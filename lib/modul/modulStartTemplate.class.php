@@ -484,7 +484,7 @@ class modulStartTemplate implements modulInterface
     }
 
     // nach dem Import: update der Referenzen
-    function postImport( $db, $oid, $ref, $user )
+    function updateRef( $db, $oid, $ref, $user )
     {
         $db->dbRequest( "update X2_JOB_START_TEMPLATE
                             set TEMPLATE_ID = ?

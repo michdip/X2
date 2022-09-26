@@ -1,5 +1,6 @@
 #!/bin/bash
 
+./execute.sh dbversion.sql
 ./execute.sh sequence.sql
 ./execute.sh mutex.sql
 ./execute.sh page_id.sql
@@ -19,6 +20,7 @@
 ./execute.sh x2_job_start.sql
 ./execute.sh x2_job_command.sql
 ./execute.sh x2_job_start_template.sql
+./execute.sh x2_job_billit_adapter.sql
 ./execute.sh x2_worklist.sql
 ./execute.sh x2_work_tree.sql
 ./execute.sh x2_work_variable.sql
@@ -26,6 +28,7 @@
 ./execute.sh x2_work_start_template.sql
 ./execute.sh x2_work_group.sql
 ./execute.sh x2_work_reference.sql
+./execute.sh x2_work_billit_adapter.sql
 ./execute.sh x2_logfile.sql
 ./execute.sh x2_archiv.sql
 ./execute.sh x2_action.sql

@@ -78,10 +78,35 @@ class modulCommand implements modulInterface
                                          . $retryTime );
     }
 
-    private function getGraphLabel( $oid, $cmd, $cols )
+    protected function getGraphLabel( $db, $oid, $cols, $opts )
     {
+        // das Kommando laden
+        $query = "select HOST,
+                         SOURCE,
+                         EXEC_PATH,
+                         replace( replace( COMMAND, '>', '&gt;' ), '<', '&lt;' ) COMMAND";
+
+        if( isset( $opts['instances'] ) && $opts['instances'] )
+            $query .= ', INSTANCES';
+
+        if( isset( $opts['retries'] ) && $opts['retries'] )
+            $query .= ', RETRIES, RETRY_TIME';
+
+        $query .= ' from ' . $opts['table' ] . '
+                   where OID = ?';
+
+        $cmds = $db->dbRequest( $query,
+                                array( array( 'i', $oid )));
+
+        if( $cmds->numRows == 0 )
+            return '';
+
+        $cmd = $cmds->resultset[0];
+
+        // die Tabellenbreite festlegen
         $colsPart = $cols - 1;
 
+        // das Label erstellen
         $label = '<TR>'
                . '<TD ALIGN="left">Host</TD>'
                . '<TD ALIGN="left" COLSPAN="' . $cols . '">' . $cmd['HOST'] . '</TD>'
@@ -105,19 +130,20 @@ class modulCommand implements modulInterface
                . '</TD>'
                . '</TR>';
 
-        if( isset( $cmd['INSTANCES' ] ))
+        if( isset( $opts['instances'] ) && $opts['instances'] )
             $label .= '<TR>'
                     . '<TD ALIGN="left">Instanzen</TD>'
-                    . '<TD ALIGN="left" COLSPAN="' . $colsPart . '">' . $cmd['INSTANCES' ] . '</TD>'
+                    . '<TD ALIGN="left" COLSPAN="' . $cols . '">' . $cmd['INSTANCES' ] . '</TD>'
+                    . '</TR>';
+
+        if( isset( $opts['retries'] ) && $opts['retries'] )
+            $label .= '<TR>'
+                    . '<TD ALIGN="left">Retries</TD>'
+                    . '<TD ALIGN="left" COLSPAN="' . $colsPart . '">' . $cmd['RETRIES' ] . ' ( ' . $cmd['RETRY_TIME'] . ' sec )</TD>'
                     . '<TD>&nbsp;</TD>'
                     . '</TR>';
 
         $label .= '<TR>'
-                . '<TD ALIGN="left">Retries</TD>'
-                . '<TD ALIGN="left" COLSPAN="' . $colsPart . '">' . $cmd['RETRIES' ] . ' ( ' . $cmd['RETRY_TIME'] . ' sec )</TD>'
-                . '<TD>&nbsp;</TD>'
-                . '</TR>'
-                . '<TR>'
                 . '<TD ALIGN="left">Befehl</TD>'
                 . '<TD ALIGN="left" COLSPAN="' . $colsPart . '">' . implode( '<BR/>', str_split( $cmd['COMMAND'], 100 )) . '</TD>'
                 . '<TD HREF="javascript:parent.copyToClipboard(\'C' . $oid . '\')" '
@@ -130,12 +156,10 @@ class modulCommand implements modulInterface
         return $label;
     }
 
-    private function nativeGetJob4Edit( $db, $get, &$eJob, &$smarty, $workJob )
+    protected function nativeGetJob4Edit( $db, $get, &$eJob, &$smarty, $cmdOpts )
     {
+        $smarty->assign( 'cmdOpts', $cmdOpts );
         $smarty->assign( 'hosts', REMOTE_HOSTS );
-
-        // instanzen ein / ausblenden
-        $smarty->assign( 'workMode', $workJob );
 
         // wurde der Job im get übergeben diesen nehen
         if( isset( $get['jobDefinition'] ))
@@ -146,40 +170,33 @@ class modulCommand implements modulInterface
             $eJob['HOST'] = $get['host'];
             $eJob['SOURCE'] = $get['source'];
             $eJob['EXEC_PATH'] = $get['execpath'];
-            $eJob['RETRIES'] = $get['retries'];
-            $eJob['RETRY_TIME'] = $get['retryTime'];
 
-            if( !$workJob )
+            if( isset( $cmdOpts['instances'] ) && $cmdOpts['instances'] )
                 $eJob['INSTANCES'] = $get['instances'];
+
+            if( isset( $cmdOpts['retries'] ) && $cmdOpts['retries'] )
+            {
+                $eJob['RETRIES'] = $get['retries'];
+                $eJob['RETRY_TIME'] = $get['retryTime'];
+            }
         }
 
         // den Job aus der DB laden
         else
         {
-            if( !$workJob )
-                $mySelf = $db->dbRequest( "select OID,
-                                                  HOST,
-                                                  SOURCE,
-                                                  EXEC_PATH,
-                                                  COMMAND,
-                                                  INSTANCES,
-                                                  RETRIES,
-                                                  RETRY_TIME
-                                             from X2_JOB_COMMAND
-                                            where OID = ?",
-                                          array( array( 'i', $get['edit'] )));
+            $query = 'select OID, HOST, SOURCE, EXEC_PATH, COMMAND';
 
-            else
-                $mySelf = $db->dbRequest( "select OID,
-                                                  HOST,
-                                                  SOURCE,
-                                                  EXEC_PATH,
-                                                  COMMAND,
-                                                  RETRIES,
-                                                  RETRY_TIME
-                                             from X2_WORK_COMMAND
-                                            where OID = ?",
-                                          array( array( 'i', $get['edit'] )));
+            if( isset( $cmdOpts['instances'] ) && $cmdOpts['instances'] )
+                $query .= ', INSTANCES';
+
+            if( isset( $cmdOpts['retries'] ) && $cmdOpts['retries'] )
+                $query .= ', RETRIES, RETRY_TIME';
+
+            $query .= ' from ' . $cmdOpts['table'] . '
+                       where OID = ?';
+
+            $mySelf = $db->dbRequest( $query,
+                                      array( array( 'i', $get['edit'] )));
 
             foreach( $mySelf->resultset as $row )
                 foreach( $row as $key => $value )
@@ -191,84 +208,96 @@ class modulCommand implements modulInterface
             $smarty->assign( 'matches', $get['matches'] );
     }
 
-    private function nativeProcessJobChanges( $db, $post, $user, $workJob, &$logger = null )
+    protected function nativeProcessJobChanges( $db, $post, $user, $opts, &$logger = null )
     {
         // der Job soll gepeichert werden
         if( !isset( $post['findPattern'] ) &&
             isset( $post['host'] ) && $post['host'] != '' &&
             isset( $post['execpath'] ) && $post['execpath'] != '' &&
-            isset( $post['command'] ) && $post['command'] != '' &&
-            isset( $post['retries'] ) && $post['retries'] != '' &&
-            isset( $post['retryTime'] ) && $post['retryTime'] != '' &&
-            ( $workJob || isset( $post['instances'] ) && $post['instances'] != '' )
+            isset( $post['command'] ) && $post['command'] != ''
           )
         {
             try
             {
-                if( !$workJob )
+                // das Statement zusammensetzen
+                $query = 'update ' . $opts['table'] . '
+                             set HOST = ?,
+                                 SOURCE = ?,
+                                 EXEC_PATH = ?,
+                                 COMMAND = ?';
+
+                $params = array( array( 's', $post['host'] ),
+                                 array( 's', $post['source'] ),
+                                 array( 's', $post['execpath'] ),
+                                 array( 's', $post['command'] ));
+
+                $message = ' / ' . $post['host'] . ' / '
+                                 . $post['source'] . ' / '
+                                 . $post['execpath'] . ' / '
+                                 . $post['command'] . ' / ';
+
+                // Instanzen
+                if( isset( $opts['instances'] ) && $opts['instances'] )
                 {
-                    $db->dbRequest( "update X2_JOB_COMMAND
-                                        set HOST = ?,
-                                            SOURCE = ?,
-                                            EXEC_PATH = ?,
-                                            COMMAND = ?,
-                                            INSTANCES = ?,
-                                            RETRIES = ?,
-                                            RETRY_TIME = ?
-                                      where OID = ?",
-                                    array( array( 's', $post['host'] ),
-                                           array( 's', $post['source'] ),
-                                           array( 's', $post['execpath'] ),
-                                           array( 's', $post['command'] ),
-                                           array( 's', $post['instances'] ),
-                                           array( 's', $post['retries'] ),
-                                           array( 's', $post['retryTime'] ),
-                                           array( 's', $post['jobID'] )),
-                                    true );
+                    $query .= ', INSTANCES = ?';
 
-                    actionlog::logAction4Job( $db,
-                                              11,
-                                              $post['jobID'],
-                                              $user,
-                                              ' / ' . $post['host'] . ' / '
-                                                    . $post['source'] . ' / '
-                                                    . $post['execpath'] . ' / '
-                                                    . $post['command'] . ' / '
-                                                    . $post['instances'] . ' / '
-                                                    . $post['retries'] . ' / '
-                                                    . $post['retryTime'] );
-
+                    if( isset( $post['instances'] ) && $post['instances'] != '' )
+                    {
+                        array_push( $params, array( 's', $post['instances'] ));
+                        $message .= $post['instances'] . ' / ';
+                    }
+                    else
+                    {
+                        array_push( $params, array( 's', 0 ));
+                        $message .= '0 / ';
+                    }
                 }
                 else
-                {
-                    $db->dbRequest( "update X2_WORK_COMMAND
-                                        set HOST = ?,
-                                            SOURCE = ?,
-                                            EXEC_PATH = ?,
-                                            COMMAND = ?,
-                                            RETRIES = ?,
-                                            RETRY_TIME = ?
-                                      where OID = ?",
-                                    array( array( 's', $post['host'] ),
-                                           array( 's', $post['source'] ),
-                                           array( 's', $post['execpath'] ),
-                                           array( 's', $post['command'] ),
-                                           array( 's', $post['retries'] ),
-                                           array( 's', $post['retryTime'] ),
-                                           array( 's', $post['jobID'] )),
-                                    true );
+                    $message .= ' / ';
 
-                    actionlog::logAction4WJob( $db,
-                                               11,
-                                               $post['jobID'],
-                                               $user,
-                                               ' / ' . $post['host'] . ' / '
-                                                     . $post['source'] . ' / '
-                                                     . $post['execpath'] . ' / '
-                                                     . $post['command'] . ' / '
-                                                     . $post['retries'] . ' / '
-                                                     . $post['retryTime'] );
+                // Retries
+                if( isset( $opts['retries'] ) && $opts['retries'] )
+                {
+                    $query .= ', RETRIES = ?, RETRY_TIME = ?';
+
+                    if( isset( $post['retries'] ) && $post['retries'] != '' )
+                    {
+                        array_push( $params, array( 's', $post['retries'] ));
+                        $message .= $post['retries'] . ' / ';
+                    }
+                    else
+                    {
+                        array_push( $params, array( 's', 0 ));
+                        $message .= '0 / ';
+                    }
+
+                    if( isset( $post['retryTime'] ) && $post['retryTime'] != '' )
+                    {
+                        array_push( $params, array( 's', $post['retryTime'] ));
+                        $message .= $post['retryTime'] . ' / ';
+                    }
+                    else
+                    {
+                        array_push( $params, array( 's', 0 ));
+                        $message .= '0 / ';
+                    }
                 }
+                else
+                    $message .= ' / ';
+
+                // nur die OID des Job
+                $query .= ' where OID = ?';
+                array_push( $params, array( 's', $post['jobID'] ));
+
+                // das Update an die DB senden
+                $db->dbRequest( $query, $params, true );
+
+                // das Actionlog schreiben
+                if( !$opts['workJob'] )
+                    actionlog::logAction4Job( $db, 11, $post['jobID'], $user, $message );
+
+                else
+                    actionlog::logAction4WJob( $db, 11, $post['jobID'], $user, $message );
 
                 $db->commit( );
             }
@@ -277,6 +306,8 @@ class modulCommand implements modulInterface
                 $db->rollback();
                 print $e->getMessage();
             }
+
+            return array( );
         }
 
         // es soll nach einem Pattern auf der Maschine gesucht werden
@@ -432,7 +463,7 @@ class modulCommand implements modulInterface
                                                             WORK_JOB_POSITION_PARENT,
                                                             $user,
                                                             true,
-                                                            false );
+                                                            -1 );
 
                     // das Kommando setzen
                     $this->nativeCreateWorkCommand( $db,
@@ -481,7 +512,7 @@ class modulCommand implements modulInterface
                                  where jl.OID = ?",
                                array( array( 'i', $origId )));
 
-        // das  original ist kein COMMAND, dann defaults setzen
+        // das Original ist kein COMMAND, dann defaults setzen
         if( $old->numRows == 0 )
             $this->nativeCreateCommand( $db, $newId, 'local', null, '/', 'sleep 1', 1, 0, 0, $user );
 
@@ -745,61 +776,40 @@ class modulCommand implements modulInterface
     // erstellt die GV-Ausgabe in der Job-Ansicht
     function getJobLabel( $db, $template, $oid, $writeable, $pageID )
     {
-        $label = '';
-
-        // das Kommando laden
-        $commands = $db->dbRequest( "select HOST,
-                                            SOURCE,
-                                            EXEC_PATH,
-                                            replace( replace( COMMAND, '>', '&gt;' ), '<', '&lt;' ) COMMAND,
-                                            INSTANCES,
-                                            RETRIES,
-                                            RETRY_TIME
-                                       from X2_JOB_COMMAND
-                                      where OID = ?",
-                                    array( array( 'i', $oid )));
-
-        foreach( $commands->resultset as $cmd )
-            $label = $this->getGraphLabel( $oid, $cmd, 4 );
-
-        return $label;
+        return $this->getGraphLabel( $db, $oid, 4, array( 'instances' => true,
+                                                          'retries'   => true,
+                                                          'table'     => 'X2_JOB_COMMAND' ));
     }
 
     function getWorkJobLabel( $db, $oid )
     {
-        $label = '';
-
-        $commands = $db->dbRequest( "select HOST,
-                                            SOURCE,
-                                            EXEC_PATH,
-                                            replace( replace( COMMAND, '>', '&gt;' ), '<', '&lt;' ) COMMAND,
-                                            RETRIES,
-                                            RETRY_TIME
-                                       from X2_WORK_COMMAND
-                                      where OID = ?",
-                                    array( array( 'i', $oid )));
-
-        foreach( $commands->resultset as $cmd )
-            $label = $this->getGraphLabel( $oid, $cmd, 6 );
-
-        return $label;
+        return $this->getGraphLabel( $db, $oid, 6, array( 'retries' => true,
+                                                          'table'   => 'X2_WORK_COMMAND' ));
     }
 
     // diese Funktion reichert den Job zum Editieren durch die TPL-Datei an
     function getJob4Edit( $db, $get, &$eJob, &$smarty )
     {
-        $this->nativeGetJob4Edit( $db, $get, $eJob, $smarty, false );
+        $this->nativeGetJob4Edit( $db, $get, $eJob, $smarty, array( 'findPattern' => true,
+                                                                    'instances'   => true,
+                                                                    'retries'     => true,
+                                                                    'table'       => 'X2_JOB_COMMAND' ));
     }
 
     // diese Funktion reichert den WorkJob zum Editieren durch die TPL-Datei an
     function getWorkJob4Edit( $db, $get, &$eJob, &$smarty )
     {
-        $this->nativeGetJob4Edit( $db, $get, $eJob, $smarty, true );
+        $this->nativeGetJob4Edit( $db, $get, $eJob, $smarty, array( 'findPattern' => true,
+                                                                    'retries'     => true,
+                                                                    'table'       => 'X2_WORK_COMMAND' ));
     }
 
     function processJobChanges( $db, $post, $user )
     {
-        return $this->nativeProcessJobChanges( $db, $post, $user, false );
+        return $this->nativeProcessJobChanges( $db, $post, $user, array( 'instances'   => true,
+                                                                         'retries'     => true,
+                                                                         'table'       => 'X2_JOB_COMMAND',
+                                                                         'workJob'     => false ));
     }
 
     function processWorkJobChanges( $db, $post, $user )
@@ -837,7 +847,13 @@ class modulCommand implements modulInterface
                 return $result;
             }
 
-            $result = $this->nativeProcessJobChanges( $db, $post, $user, true, $logger );
+            $result = $this->nativeProcessJobChanges( $db,
+                                                      $post,
+                                                      $user,
+                                                      array( 'retries'     => true,
+                                                             'table'       => 'X2_WORK_COMMAND',
+                                                             'workJob'     => true ),
+                                                      $logger );
         }
 
         // Mutex zurückgeben

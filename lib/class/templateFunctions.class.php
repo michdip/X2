@@ -232,7 +232,7 @@ class templateFunctions
                 return;
 
             // ein Template erstellen
-            $mySelf = templateFunctions::nativeCreateTemplate( $db, 'T', 'Kopie ' . $orig->resultset[0]['OBJECT_NAME'], $user );
+            $mySelf = templateFunctions::nativeCreateTemplate( $db, 'T', $orig->resultset[0]['OBJECT_NAME'] . ' (Kopie)', $user );
 
             // den Vater kopiern
             $parents = $db->dbRequest( "select PARENT
@@ -376,8 +376,24 @@ class templateFunctions
         // im Fore-Modus erst alle Jobs von unten nach oben löschen
         if( $force )
         {
+            /* bei allen Modulen mit Templateinternen Referenzen
+             * diese zuerst entfernen
+             */
+            $module = modulFunctions::getAllModulInstances( );
+
+            $refs = $db->dbRequest( "select OID,
+                                            JOB_TYPE
+                                       from X2_JOBLIST
+                                      where JOB_TYPE in ( 'BILLIT_ADAPTER' )
+                                        and TEMPLATE_ID = ?",
+                                    array( array( 'i', $tid )));
+
+            foreach( $refs->resultset as $job )
+                $module[ $job['JOB_TYPE']]->updateRef( $db, $job['OID'], $job['OID'], $user );
+
             do
             {
+                // alle Jobs von unten nach oben selektieren
                 $myJobs = $db->dbRequest( "select jl.OID
                                              from X2_JOBLIST jl
                                                   left join X2_JOB_TREE jt
@@ -778,25 +794,38 @@ class templateFunctions
             foreach( $allGroups as $grpName )
                 $result[ $grpName ] = array( PERM_READ  => false,
                                              PERM_WRITE => false,
-                                             PERM_EXE   => false,
-                                             PERM_ADMIN => false );
+                                             PERM_EXE   => false );
         }
 
         // meine Gruppenrechte laden
-        $myRights = $db->dbRequest( "select PERM_GROUP, PERM_TYPE
-                                       from PERMISSION
-                                      where OBJECT_TYPE = ?
-                                        and OBJECT_ID = ?",
-                                    array( array( 'i', PERM_OBJECT_TEMPLATE ),
-                                           array( 'i', $tid )));
+        if( $tid == 0 && $perm != null )
+        {
+            $myRights = array( );
+            $myRightsq = $perm->getRootTreeRights( );
 
-        foreach( $myRights->resultset as $row )
+            foreach( $myRightsq as $grpName => $perms )
+                foreach( $perms as $permValue )
+                    array_push( $myRights, array( 'PERM_GROUP' => $grpName,
+                                                  'PERM_TYPE'  => $permValue ));
+        }
+        else
+        {
+            $myRightsq = $db->dbRequest( "select PERM_GROUP, PERM_TYPE
+                                            from PERMISSION
+                                           where OBJECT_TYPE = ?
+                                             and OBJECT_ID = ?",
+                                         array( array( 'i', PERM_OBJECT_TEMPLATE ),
+                                                array( 'i', $tid )));
+
+            $myRights = $myRightsq->resultset;
+        }
+
+        foreach( $myRights as $row )
         {
             if( !isset( $result[ $row['PERM_GROUP']] ))
                 $result[ $row['PERM_GROUP']] = array( PERM_READ  => false,
                                                       PERM_WRITE => false,
-                                                      PERM_EXE   => false,
-                                                      PERM_ADMIN => false );
+                                                      PERM_EXE   => false );
 
             $result[ $row['PERM_GROUP']][ $row['PERM_TYPE']] = true;
         }
@@ -1261,14 +1290,12 @@ class templateFunctions
             // die Rechte auf den Vater des Templates abfragen
             $template['gPerms'] = array( 'READ'  => $permission->canIDo( $db, PERM_OBJECT_TEMPLATE, $parent, PERM_READ ),
                                          'WRITE' => $permission->canIDo( $db, PERM_OBJECT_TEMPLATE, $parent, PERM_WRITE ),
-                                         'EXE'   => $permission->canIDo( $db, PERM_OBJECT_TEMPLATE, $parent, PERM_EXE ),
-                                         'ADMIN' => $permission->canIDo( $db, PERM_OBJECT_TEMPLATE, $parent, PERM_ADMIN ));
+                                         'EXE'   => $permission->canIDo( $db, PERM_OBJECT_TEMPLATE, $parent, PERM_EXE ));
 
             // die Rechte auf das Template abfragen
             $template['uPerms'] = array( 'READ'  => $permission->canIDo( $db, PERM_OBJECT_TEMPLATE, $template['OID'], PERM_READ ),
                                          'WRITE' => $permission->canIDo( $db, PERM_OBJECT_TEMPLATE, $template['OID'], PERM_WRITE ),
-                                         'EXE'   => $permission->canIDo( $db, PERM_OBJECT_TEMPLATE, $template['OID'], PERM_EXE ),
-                                         'ADMIN' => $permission->canIDo( $db, PERM_OBJECT_TEMPLATE, $template['OID'], PERM_ADMIN ));
+                                         'EXE'   => $permission->canIDo( $db, PERM_OBJECT_TEMPLATE, $template['OID'], PERM_EXE ));
 
             // kann das Template gelöscht werden
             $template['showDelete'] = templateFunctions::isDeletable( $db, $template['OID'] );

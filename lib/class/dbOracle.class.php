@@ -49,7 +49,7 @@
                 $this->throwError( $this->dbLink, $throw );
 
             // binds setzen, wenn vorhanden
-            if( count( $params ))
+            if( $params != null && count( $params ))
                 foreach( $params as $key => &$value )
                     oci_bind_by_name( $stmt, $key, $value );
 

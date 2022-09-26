@@ -38,11 +38,11 @@ if( $perm->isValidSession( ))
     $js = array( );
 
     // Das Template auslesen
-    if( isset( $_GET['tid' ] ))
-        $template = $_GET['tid' ];
+    if( isset( $_GET['tid'] ))
+        $template = $_GET['tid'];
 
-    else if( isset( $_POST['templateID' ] ))
-        $template = $_POST['templateID' ];
+    else if( isset( $_POST['templateID'] ))
+        $template = $_POST['templateID'];
 
     // varsOnly setzen
     if( isset( $_GET['varsOnly'] ))
@@ -67,7 +67,7 @@ if( $perm->isValidSession( ))
 
         // die Variablen verändern
         else if(( isset( $_POST['maxVars'] ) || isset( $_POST['varValue_0'] )) && 
-                 $perm->canIDo( $db, PERM_OBJECT_TEMPLATE, $_POST['templateID' ], PERM_EXE ))
+                 $perm->canIDo( $db, PERM_OBJECT_TEMPLATE, $_POST['templateID'], PERM_EXE ))
             templateFunctions::editVars( $db, $_POST, $perm->getMyUserName( ));
 
         // Variablen zum Editieren öffnen
@@ -92,37 +92,37 @@ if( $perm->isValidSession( ))
 
                 // einen Job löschen
                 else if( isset( $_GET['remove'] ) &&
-                         $perm->canIDo( $db, PERM_OBJECT_TEMPLATE, $_GET['tid' ], PERM_WRITE ))
+                         $perm->canIDo( $db, PERM_OBJECT_TEMPLATE, $_GET['tid'], PERM_WRITE ))
                     jobFunctions::removeJob( $db, $_GET['remove'], $perm->getMyUserName( ));
 
                 // einen Breakpoint setzen
                 else if( isset( $_GET['setBp'] ) &&
-                         $perm->canIDo( $db, PERM_OBJECT_TEMPLATE, $_GET['tid' ], PERM_WRITE ))
+                         $perm->canIDo( $db, PERM_OBJECT_TEMPLATE, $_GET['tid'], PERM_WRITE ))
                     jobFunctions::setBreakpoint( $db, $_GET['setBp'], $perm->getMyUserName( ), 1 );
 
                 // einen Breakpoint entfernen
                 else if( isset( $_GET['unsetBp'] ) &&
-                         $perm->canIDo( $db, PERM_OBJECT_TEMPLATE, $_GET['tid' ], PERM_WRITE ))
+                         $perm->canIDo( $db, PERM_OBJECT_TEMPLATE, $_GET['tid'], PERM_WRITE ))
                     jobFunctions::setBreakpoint( $db, $_GET['unsetBp'], $perm->getMyUserName( ), null );
 
                 // einen Link erstellen
                 else if( isset( $_GET['link'] ) && isset( $_GET['linkTo'] ) &&
-                         $perm->canIDo( $db, PERM_OBJECT_TEMPLATE, $_GET['tid' ], PERM_WRITE ))
+                         $perm->canIDo( $db, PERM_OBJECT_TEMPLATE, $_GET['tid'], PERM_WRITE ))
                     jobFunctions::linkJob( $db, $_GET['linkTo'], $_GET['link'], $perm->getMyUserName( ));
 
                 // einen Link löschen
                 else if( isset( $_GET['remlink'] ) && isset( $_GET['linkTo'] ) &&
-                         $perm->canIDo( $db, PERM_OBJECT_TEMPLATE, $_GET['tid' ], PERM_WRITE ))
+                         $perm->canIDo( $db, PERM_OBJECT_TEMPLATE, $_GET['tid'], PERM_WRITE ))
                     jobFunctions::unlinkJob( $db, $_GET['linkTo'], $_GET['remlink'], $perm->getMyUserName( ));
 
                 // einen Job zum editieren öffnen
                 else if( isset( $_GET['edit'] ) && $_GET['edit'] != '' &&
-                         $perm->canIDo( $db, PERM_OBJECT_TEMPLATE, $_GET['tid' ], PERM_WRITE ))
+                         $perm->canIDo( $db, PERM_OBJECT_TEMPLATE, $_GET['tid'], PERM_WRITE ))
                     prepareEdit( $db, $_GET, $smarty, $css );
 
                 // eine Beschreibung setzen
                 else if( isset( $_POST['descOID'] ) &&
-                         $perm->canIDo( $db, PERM_OBJECT_TEMPLATE, $_POST['templateID' ], PERM_WRITE ))
+                         $perm->canIDo( $db, PERM_OBJECT_TEMPLATE, $_POST['templateID'], PERM_WRITE ))
                     description::setDescription( $db,
                                                  'JOB',
                                                  $_POST['descOID'],
@@ -132,7 +132,7 @@ if( $perm->isValidSession( ))
 
                 // eine Beschreibung zum Editieren öffnen
                 else if( isset( $_GET['editDesc'] ) &&
-                         $perm->canIDo( $db, PERM_OBJECT_TEMPLATE, $_GET['tid' ], PERM_WRITE ))
+                         $perm->canIDo( $db, PERM_OBJECT_TEMPLATE, $_GET['tid'], PERM_WRITE ))
                 {
                     $smarty->assign( 'showDesc', true );
                     $smarty->assign( 'descOTpe', 'JOB' );
@@ -145,15 +145,19 @@ if( $perm->isValidSession( ))
                 // den Typen des Jobs wandeln
                 else if( isset( $_POST['changeJobType'] ) && isset( $_POST['currentJobType'] ) &&
                          $_POST['changeJobType'] != $_POST['currentJobType'] &&
-                         $perm->canIDo( $db, PERM_OBJECT_TEMPLATE, $_POST['templateID' ], PERM_WRITE ))
+                         $perm->canIDo( $db, PERM_OBJECT_TEMPLATE, $_POST['templateID'], PERM_WRITE ))
                 {
                     jobFunctions::changeJobType( $db, $_POST['jobID'], $_POST['changeJobType'], $perm->getMyUserName( ));
-                    prepareEdit( $db, array( 'edit' => $_POST['jobID'] ), $smarty, $css );
+                    prepareEdit( $db,
+                                 array( 'edit' => $_POST['jobID'],
+                                        'tid'  => $_POST['templateID'] ),
+                                 $smarty,
+                                 $css );
                 }
 
                 // Antwort dem Modul zur Verfügung stellen
                 else if( isset( $_POST['jobID'] ) &&
-                         $perm->canIDo( $db, PERM_OBJECT_TEMPLATE, $_POST['templateID' ], PERM_WRITE ))
+                         $perm->canIDo( $db, PERM_OBJECT_TEMPLATE, $_POST['templateID'], PERM_WRITE ))
                 {
                     $eJob = jobFunctions::getJob4Edit( $db, $_POST['jobID'] );
 
@@ -170,7 +174,7 @@ if( $perm->isValidSession( ))
 
                 // direkt-Link dem Modul zur Verfügung stellen
                 else if( isset( $_GET['jobID'] ) &&
-                         $perm->canIDo( $db, PERM_OBJECT_TEMPLATE, $_GET['tid' ], PERM_WRITE ))
+                         $perm->canIDo( $db, PERM_OBJECT_TEMPLATE, $_GET['tid'], PERM_WRITE ))
                 {
                     $eJob = jobFunctions::getJob4Edit( $db, $_GET['jobID'] );
 

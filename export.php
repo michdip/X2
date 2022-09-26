@@ -3,6 +3,7 @@
 require_once 'conf.d/base.conf';
 require_once( ROOT_DIR . '/conf.d/x2.conf' );
 require_once( ROOT_DIR . '/lib/class/dbLink.class.php' );
+require_once( ROOT_DIR . '/lib/modul/modulInterface.class.php' );
 
 // Eine Description exportieren
 function exportDescription( $db, $objectType, $objectId, &$objects )

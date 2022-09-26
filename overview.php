@@ -19,7 +19,6 @@ function prepareEditRights( $db, $tid, $perm, &$css, &$smarty )
     $smarty->assign( 'PERM_READ', PERM_READ );
     $smarty->assign( 'PERM_WRITE', PERM_WRITE );
     $smarty->assign( 'PERM_EXE', PERM_EXE );
-    $smarty->assign( 'PERM_ADMIN', PERM_ADMIN );
 
     array_push( $css, 'dialog.css' );
 }
