@@ -720,6 +720,20 @@ class templateFunctions
      * Template-Werte *
      ******************/
 
+    public static function getTemplateParent( $db, $oid )
+    {
+        $parent = $db->dbRequest( "select PARENT
+                                     from X2_TEMPLATE_TREE
+                                    where VGRAD = 1
+                                      and OID = ?",
+                                  array( array( 'i', $oid )));
+
+        if( $parent->numRows == 0 )
+            return 0;
+
+        return $parent->resultset[0]['PARENT'];
+    }
+
     public static function getVariables( $db, $oid )
     {
         $vars = $db->dbRequest( "with parent as ( select PARENT, VGRAD
@@ -1238,6 +1252,7 @@ class templateFunctions
         // Nach Templates suchen
         if( $sPattern != null )
         {
+            $parent = null;
             $query .= "where OID in ( select TEMPLATE_ID
                                         from X2_JOBLIST jl
                                              inner join X2_JOB_COMMAND jc
@@ -1287,10 +1302,16 @@ class templateFunctions
 
         foreach( $tpls->resultset as $template )
         {
+            // den Vater des Template setzen
+            if( $parent != null )
+                $template['parentID'] = $parent;
+            else
+                $template['parentID'] = templateFunctions::getTemplateParent( $db, $template['OID'] );
+
             // die Rechte auf den Vater des Templates abfragen
-            $template['gPerms'] = array( 'READ'  => $permission->canIDo( $db, PERM_OBJECT_TEMPLATE, $parent, PERM_READ ),
-                                         'WRITE' => $permission->canIDo( $db, PERM_OBJECT_TEMPLATE, $parent, PERM_WRITE ),
-                                         'EXE'   => $permission->canIDo( $db, PERM_OBJECT_TEMPLATE, $parent, PERM_EXE ));
+            $template['gPerms'] = array( 'READ'  => $permission->canIDo( $db, PERM_OBJECT_TEMPLATE, $template['parentID'], PERM_READ ),
+                                         'WRITE' => $permission->canIDo( $db, PERM_OBJECT_TEMPLATE, $template['parentID'], PERM_WRITE ),
+                                         'EXE'   => $permission->canIDo( $db, PERM_OBJECT_TEMPLATE, $template['parentID'], PERM_EXE ));
 
             // die Rechte auf das Template abfragen
             $template['uPerms'] = array( 'READ'  => $permission->canIDo( $db, PERM_OBJECT_TEMPLATE, $template['OID'], PERM_READ ),

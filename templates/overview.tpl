@@ -75,6 +75,7 @@
         {if $viewOption.X2_SEARCH_TEMPLATE}
             <form method="post" action="overview.php" style="display: inline" />
                 <input type="hidden" name="pageID" value="{$pageID}" />
+                <input type="hidden" name="set_X2_SEARCH_TEMPLATE" value="on" />
 
                 <p align="center">
                     Suche: <input type="text" name="sPattern" value="{$sPattern}" />
@@ -140,11 +141,11 @@
                             {if $template.uPerms.READ}
                                 {if $template.desc.DESCRIPTION == ''}
                                     <a class="glTag blueButton"
-                                        href="overview.php?parentID={$parentID}&pageID={$pageID}&editDesc={$template.OID}"
+                                        href="overview.php?parentID={$template.parentID}&pageID={$pageID}&editDesc={$template.OID}"
                                        title="Die Beschreibung des Templates anzeigen"></a>
                                 {else}
                                     <a class="glTag greenButton"
-                                        href="overview.php?parentID={$parentID}&pageID={$pageID}&editDesc={$template.OID}"
+                                        href="overview.php?parentID={$template.parentID}&pageID={$pageID}&editDesc={$template.OID}"
                                        title="{$template.desc.DESCRIPTION}"></a>
                                 {/if}
                             {else}
@@ -175,7 +176,7 @@
                     {if $viewOption.X2_VIEW_RECHT}
                         <td>
                             <a class="glRecht blueButton"
-                                href="overview.php?parentID={$parentID}&pageID={$pageID}&setRights={$template.OID}"
+                                href="overview.php?parentID={$template.parentID}&pageID={$pageID}&setRights={$template.OID}"
                                title="Berechtigungen bearbeiten"></a>
                         </td>
                     {else}
@@ -206,7 +207,7 @@
                         <td>
                             {if $template.uPerms.WRITE}
                                 <a class="glEdit blueButton"
-                                    href="overview.php?parentID={$parentID}&pageID={$pageID}&edit={$template.OID}"
+                                    href="overview.php?parentID={$template.parentID}&pageID={$pageID}&edit={$template.OID}"
                                     title="Objekt umbenennen"></a>
                             {else}
                                 <span class="glEdit grayButton" />
@@ -221,7 +222,7 @@
                         <td>
                             {if $template.gPerms.WRITE && $template.uPerms.READ}
                                 <a class="glDup blueButton"
-                                    href="overview.php?parentID={$parentID}&pageID={$pageID}&duplicate={$template.OID}"
+                                    href="overview.php?parentID={$template.parentID}&pageID={$pageID}&duplicate={$template.OID}"
                                    title="Template duplizieren"></a>
                             {else}
                                 <span class="glDup grayButton" />
@@ -236,7 +237,7 @@
                         <td>
                             {if $template.gPerms.WRITE && $template.uPerms.WRITE}
                                 <a class="glMove blueButton"
-                                    href="templateTree.php?parentID={$parentID}&pageID={$pageID}&move={$template.OID}"
+                                    href="templateTree.php?parentID={$template.parentID}&pageID={$pageID}&move={$template.OID}"
                                    title="Objekt verschieben"></a>
                             {else}
                                 <span class="glMove grayButton" />
@@ -268,13 +269,13 @@
                             {if $template.gPerms.WRITE && $template.uPerms.WRITE}
                                 {if $template.showDelete}
                                     <a class="glRem greenButton"
-                                        href="overview.php?parentID={$parentID}&pageID={$pageID}&rem={$template.OID}"
+                                        href="overview.php?parentID={$template.parentID}&pageID={$pageID}&rem={$template.OID}"
                                        title="Objekt löschen"></a>
                                 {else if $template.OBJECT_TYPE == 'T' &&
                                          !$template.isLinked &&
                                          $template.showPower == 'powerOn'}
                                     <a class="glRem blueButton"
-                                        href="overview.php?parentID={$parentID}&pageID={$pageID}&rem={$template.OID}"
+                                        href="overview.php?parentID={$template.parentID}&pageID={$pageID}&rem={$template.OID}"
                                        title="Objekt löschen"></a>
                                 {/if}
                             {else}
@@ -303,11 +304,11 @@
                                 <span class="glMail grayButton" />
                             {elseif $template.hasNotifier}
                                 <a class="glMail greenButton"
-                                    href="overview.php?parentID={$parentID}&pageID={$pageID}&mail={$template.OID}"
+                                    href="overview.php?parentID={$template.parentID}&pageID={$pageID}&mail={$template.OID}"
                                    title="eMail-Benachrichtigung setzen"></a>
                             {else}
                                 <a class="glMail blueButton"
-                                    href="overview.php?parentID={$parentID}&pageID={$pageID}&mail={$template.OID}"
+                                    href="overview.php?parentID={$template.parentID}&pageID={$pageID}&mail={$template.OID}"
                                    title="eMail-Benachrichtigung setzen"></a>
                             {/if}
                         </td>
@@ -319,7 +320,7 @@
                     {if isset( $editTplName ) && $editTplName == $template.OID}
                         <form method="post" action="overview.php" style="display: inline">
                             <input type="hidden" name="pageID" value="{$pageID}" />
-                            <input type="hidden" name="parentID" value="{$parentID}" />
+                            <input type="hidden" name="parentID" value="{$template.parentID}" />
                             <input type="hidden" name="templateID" value="{$template.OID}" />
 
                             <td>
@@ -341,7 +342,7 @@
                             {if $template.uPerms.ADMIN}
                                 <td>
                                     <a class="glRoad redButton"
-                                        href="overview.php?parentID={$parentID}&pageID={$pageID}&mutex={$template.OID}"
+                                        href="overview.php?parentID={$template.parentID}&pageID={$pageID}&mutex={$template.OID}"
                                        title="Mutex zurücksetzen"></a>
                                 </td>
                             {else}
@@ -393,11 +394,11 @@
                                     <span class="glPower grayButton" />
                                 {elseif $template.showPower == 'powerOn'}
                                     <a class="glPower redButton"
-                                        href="overview.php?parentID={$parentID}&pageID={$pageID}&powerOn={$template.OID}"
+                                        href="overview.php?parentID={$template.parentID}&pageID={$pageID}&powerOn={$template.OID}"
                                        title="Template aktivieren"></a>
                                 {elseif $template.showPower == 'powerOff'}
                                     <a class="glPower blueButton"
-                                        href="overview.php?parentID={$parentID}&pageID={$pageID}&powerOff={$template.OID}"
+                                        href="overview.php?parentID={$template.parentID}&pageID={$pageID}&powerOff={$template.OID}"
                                        title="Template deaktivieren"></a>
                                 {/if}
                             </td>
@@ -412,7 +413,7 @@
                                     <span class="glSchedule grayButton" />
                                 {else}
                                     <a class="glSchedule redButton"
-                                        href="overview.php?parentID={$parentID}&pageID={$pageID}&shedule={$template.OID}"
+                                        href="overview.php?parentID={$template.parentID}&pageID={$pageID}&shedule={$template.OID}"
                                        title="automatisierte Ausführung starten"></a>
                                 {/if}
                             </td>
@@ -425,7 +426,7 @@
                             <td>
                                 {if $template.uPerms.EXE}
                                     <a class="glPlay blueButton"
-                                        href="overview.php?parentID={$parentID}&pageID={$pageID}&play={$template.OID}"
+                                        href="overview.php?parentID={$template.parentID}&pageID={$pageID}&play={$template.OID}"
                                        title="Ausführung starten"></a>
                                 {else}
                                     <span class="glPlay grayButton" />
@@ -435,7 +436,7 @@
                             <td>
                                 {if $template.uPerms.EXE}
                                     <a class="glPause blueButton"
-                                        href="overview.php?parentID={$parentID}&pageID={$pageID}&pause={$template.OID}"
+                                        href="overview.php?parentID={$template.parentID}&pageID={$pageID}&pause={$template.OID}"
                                        title="Ausführung pausieren"></a>
                                 {else}
                                     <span class="glPause grayButton" />
@@ -445,7 +446,7 @@
                             <td class="rotated">
                                 {if $template.uPerms.EXE}
                                     <a class="glEject blueButton"
-                                        href="overview.php?parentID={$parentID}&pageID={$pageID}&resume={$template.OID}"
+                                        href="overview.php?parentID={$template.parentID}&pageID={$pageID}&resume={$template.OID}"
                                        title="Ausführung fortsetzen"></a>
                                 {else}
                                     <span class="glEject grayButton" />
@@ -460,7 +461,7 @@
                             <td>
                                 {if $template.uPerms.EXE}
                                     <a class="glEject blueButton"
-                                        href="overview.php?parentID={$parentID}&pageID={$pageID}&eject={$template.OID}"
+                                        href="overview.php?parentID={$template.parentID}&pageID={$pageID}&eject={$template.OID}"
                                        title="Ausführung abbrechen"></a>
                                 {else}
                                     <span class="glEject grayButton" />

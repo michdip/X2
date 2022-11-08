@@ -53,11 +53,12 @@ class viewOption
 
         // alle Rechte schreiben
         foreach( viewOption::$view as $option )
-            $db->dbRequest( "insert into X2_VIREW_OPTION (X2_USER, VIEW_NAME, VIEW_VALUE)
-                             values ( ?, ?, ? )",
-                            array( array( 's', $user ),
-                                   array( 's', $option ),
-                                   array( 'i', isset( $postFields[ 'set_' . $option ] ))));
+            if( $option != 'X2_SEARCH_TEMPLATE' )
+                $db->dbRequest( "insert into X2_VIREW_OPTION (X2_USER, VIEW_NAME, VIEW_VALUE)
+                                 values ( ?, ?, ? )",
+                                array( array( 's', $user ),
+                                       array( 's', $option ),
+                                       array( 'i', isset( $postFields[ 'set_' . $option ] ))));
 
         $db->commit( );
     }

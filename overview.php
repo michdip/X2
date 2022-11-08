@@ -276,6 +276,11 @@ if( $perm->isValidSession( ))
 
     // die viewOption laden
     $viewOption = viewOption::getUserViewOption( $db, $perm->getMyUserName( ));
+
+    // die Suche einschalten
+    if( isset( $_POST['set_X2_SEARCH_TEMPLATE'] ))
+        $viewOption['X2_SEARCH_TEMPLATE'] = 1;
+
     $smarty->assign( 'viewOption', $viewOption );
 
     // Alle Templates laden
@@ -288,11 +293,12 @@ if( $perm->isValidSession( ))
         $parentID = 0;
 
         if( isset( $_POST['sPattern'] ))
+        {
             $sPattern = $_POST['sPattern'];
+            templateFunctions::getTemplates2Display( $db, null, $perm, $sPattern, $templates );
+        }
 
         $smarty->assign('sPattern', $sPattern );
-
-        templateFunctions::getTemplates2Display( $db, $parentID, $perm, $sPattern, $templates );
     }
     else
     {
